@@ -41,6 +41,7 @@ let () =
             | "#logout" ->
                 Helpers.clear_auth_state () ;
                 Pages.Settings_user.reset_state () ;
+                Pages.Settings_contests.reset_state () ;
                 Helpers.navigate_to_with_reload "#login" ;
                 []
             | "#users" -> [Pages.Users.render ()]

@@ -15,6 +15,7 @@
   settings_llm
   settings_password
   settings_user
+  settings_contests
   settings_yodac
   settings_stats
   settings_stats_graphs

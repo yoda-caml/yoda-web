@@ -18,7 +18,15 @@ let key_settings_referrer = "yoda-settings-referrer"
 let key_language = "yoda-language"
 
 (* Tab state *)
-type tab = Settings | Password | Config | Stats | Users | Problems | Llm
+type tab =
+  | Settings
+  | Password
+  | Config
+  | Stats
+  | Users
+  | Contests
+  | Problems
+  | Llm
 
 let tab_label = function
   | Settings -> I18n.t "settings_tab_general"
@@ -26,6 +34,7 @@ let tab_label = function
   | Config -> I18n.t "settings_tab_yodac"
   | Stats -> I18n.t "settings_tab_stats"
   | Users -> I18n.t "settings_tab_users"
+  | Contests -> I18n.t "contests_title"
   | Problems -> I18n.t "settings_tab_problems"
   | Llm -> I18n.t "settings_llm_evaluation"
 
@@ -385,6 +394,22 @@ let render_tabs () =
                             false ) ]
                     [txt (tab_label Users)] ]
             else li [] )
+        ; ( if Helpers.is_admin () then
+              li
+                ~a:[a_class ["nav-item"]]
+                [ a
+                    ~a:
+                      [ a_class
+                          ( "nav-link"
+                          ::
+                          (if !active_tab = Contests then ["active"] else [])
+                          )
+                      ; a_href "#settings-contests"
+                      ; a_onclick (fun _ ->
+                            Helpers.navigate_to "#settings-contests" ;
+                            false ) ]
+                    [txt (tab_label Contests)] ]
+            else li [] )
         ; ( if Helpers.is_judge_or_admin () then
               li
                 ~a:[a_class ["nav-item"]]
@@ -471,6 +496,9 @@ let render ?(tab = "general") () =
               | "users" ->
                   active_tab := Users ;
                   Settings_user.render_users_tab ()
+              | "contests" ->
+                  active_tab := Contests ;
+                  Settings_contests.render_tab ()
               | "problems" ->
                   active_tab := Problems ;
                   Settings_problems.render_problems_tab ()

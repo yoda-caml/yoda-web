@@ -46,6 +46,8 @@ let get_contests () = fetch_json (base_url ^ "/contests")
 let get_contest contest_id =
   fetch_json (Printf.sprintf "%s/contests/%d" base_url contest_id)
 
+let post_contest body = post_json (base_url ^ "/judge/contests") body
+
 let submit_solution json_obj =
   post_json (base_url ^ "/submissions") (Yojson.Safe.to_string json_obj)
 
@@ -77,6 +79,12 @@ let delete_json url =
   >>= fun resp ->
   External_lib.Helpers.handle_unauthorized resp ;
   Lwt.return resp.code
+
+let put_contest contest_id body =
+  put_json (Printf.sprintf "%s/judge/contests/%d" base_url contest_id) body
+
+let delete_contest contest_id =
+  delete_json (Printf.sprintf "%s/judge/contests/%d" base_url contest_id)
 
 let post_admin_user json_obj =
   post_json (base_url ^ "/admin/users") (Yojson.Basic.to_string json_obj)
