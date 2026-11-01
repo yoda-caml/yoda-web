@@ -109,7 +109,8 @@ let edit (contest : Api.Openapi.contest) =
   title := contest.title ;
   description := Option.value ~default:"" contest.description ;
   start_time := datetime_local_value contest.start_time ;
-  end_time := datetime_local_value contest.end_time ;
+  end_time :=
+    datetime_local_value (Option.value ~default:"" contest.end_time) ;
   status := string_of_status contest.status ;
   error := None ;
   notice := None ;
@@ -140,8 +141,8 @@ let save () =
           ; ("start_time", `String start)
           ; ("end_time", `String finish)
           ; ( "status"
-            , Api.Openapi.ContestStatus.to_yojson (status_of_string !status)
-            ) ]
+            , Api.Openapi.ContestCreateRequestStatus.to_yojson
+                (status_of_string !status) ) ]
         in
         let body = Yojson.Safe.to_string (`Assoc fields) in
         let request =
@@ -308,7 +309,7 @@ let render_tab () =
           [ td [txt (string_of_int contest.id)]
           ; td [txt contest.title]
           ; td [txt contest.start_time]
-          ; td [txt contest.end_time]
+          ; td [txt (Option.value ~default:"" contest.end_time)]
           ; td [txt (string_of_status contest.status)]
           ; td
               ~a:[a_class ["text-end"]]

@@ -511,7 +511,8 @@ let evaluate_latest_for_problem problem_id =
           | Some owner_id -> (
             match Hashtbl.find_opt latest owner_id with
             | Some (previous : Api.Openapi.submission)
-              when previous.id >= sub.id -> ()
+              when previous.id >= sub.id ->
+                ()
             | _ -> Hashtbl.replace latest owner_id sub ) )
       all_submissions ;
     let latest = Hashtbl.fold (fun _ sub acc -> sub :: acc) latest [] in
@@ -540,12 +541,14 @@ let evaluate_latest_for_problem problem_id =
           latest
         >>= fun fetched ->
         if
-          !contest = contest_id && !batch_request_id = request_id
+          !contest = contest_id
+          && !batch_request_id = request_id
           && Helpers.get_username () = username
         then (
           batch_fetching := false ;
           let unavailable =
-            List.length (List.filter (fun (_, sources) -> sources = []) fetched)
+            List.length
+              (List.filter (fun (_, sources) -> sources = []) fetched)
           in
           let saved = load_evaluations contest_id in
           let inputs =
@@ -575,18 +578,19 @@ let evaluate_latest_for_problem problem_id =
                   sources )
               fetched
             |> List.filter (fun (input : Components.Llm_evaluation.input) ->
-                   not
-                     (List.exists
-                        (fun result ->
-                          result.submission_id = input.submission_id
-                          && result.filename = input.filename )
-                        saved )
-                   && not (Components.Llm_evaluation.is_pending input) )
+                (not
+                   (List.exists
+                      (fun result ->
+                        result.submission_id = input.submission_id
+                        && result.filename = input.filename )
+                      saved ) )
+                && not (Components.Llm_evaluation.is_pending input) )
           in
           let inputs =
             List.sort_uniq
               (fun (a : Components.Llm_evaluation.input) b ->
-                compare (a.submission_id, a.filename)
+                compare
+                  (a.submission_id, a.filename)
                   (b.submission_id, b.filename) )
               inputs
           in
@@ -596,7 +600,8 @@ let evaluate_latest_for_problem problem_id =
               (fun (input : Components.Llm_evaluation.input) ->
                 input.submission_id )
               inputs
-            |> List.sort_uniq Int.compare |> List.length
+            |> List.sort_uniq Int.compare
+            |> List.length
           in
           if total = 0 then
             batch_notice :=
@@ -615,10 +620,9 @@ let evaluate_latest_for_problem problem_id =
                 ; inputs } ;
             batch_notice :=
               Printf.sprintf
-                "Ready to send %d source file(s) from %d user(s) for problem \
-                 %s. This may incur provider charges."
-                total user_count
-                (problem_code problem_id) ) ;
+                "Ready to send %d source file(s) from %d user(s) for \
+                 problem %s. This may incur provider charges."
+                total user_count (problem_code problem_id) ) ;
           rerender () ) ;
         Lwt.return_unit ) )
 
@@ -637,12 +641,12 @@ let confirm_batch (config : Components.Llm_evaluation.config) =
         let inputs =
           List.filter
             (fun (input : Components.Llm_evaluation.input) ->
-              not
-                (List.exists
-                   (fun result ->
-                     result.submission_id = input.submission_id
-                     && result.filename = input.filename )
-                   saved )
+              (not
+                 (List.exists
+                    (fun result ->
+                      result.submission_id = input.submission_id
+                      && result.filename = input.filename )
+                    saved ) )
               && not (Components.Llm_evaluation.is_pending input) )
             preview.inputs
         in
@@ -660,8 +664,9 @@ let confirm_batch (config : Components.Llm_evaluation.config) =
                  ~on_result:(fun text error ->
                    record_evaluation preview.contest_id input.submission_id
                      input.filename text error ;
-                   if !contest = preview.contest_id
-                      && !batch_request_id = preview.request_id
+                   if
+                     !contest = preview.contest_id
+                     && !batch_request_id = preview.request_id
                    then (
                      incr completed ;
                      if error then incr failed ;
@@ -1045,11 +1050,12 @@ let results_table () =
   let batch_problems =
     !submissions
     |> List.filter_map (fun (sub : Api.Openapi.submission) ->
-           match sub.owner_id with
-           | Some _ -> Some sub.problem_id
-           | None -> None )
+        match sub.owner_id with
+        | Some _ -> Some sub.problem_id
+        | None -> None )
     |> List.sort_uniq Int.compare
-    |> List.sort (fun a b -> String.compare (problem_code a) (problem_code b))
+    |> List.sort (fun a b ->
+        String.compare (problem_code a) (problem_code b) )
   in
   let rows =
     List.sort (fun a b -> Int.compare b.submission.id a.submission.id) !files
@@ -1066,70 +1072,73 @@ let results_table () =
               ; "gap-2"
               ; "mb-2" ] ]
         ( h2 ~a:[a_class ["h5"; "mb-0"]] [txt "Submission Review"]
-        :: if show_user then
-             [ div
-                 ~a:[a_class ["d-flex"; "flex-wrap"; "gap-2"]]
-                 [ label
-                     ~a:
-                       [ a_class ["visually-hidden"]
-                       ; a_label_for "judge-batch-problem" ]
-                     [txt "Problem for batch LLM evaluation"]
-                 ; select
-                     ~a:
-                       ( [ a_id "judge-batch-problem"
-                         ; a_class ["form-select"; "form-select-sm"]
-                         ; a_style "width:auto;max-width:18rem"
-                         ; a_onchange (fun event ->
-                               let target =
-                                 Js.Opt.get event##.target (fun () ->
-                                     assert false )
-                               in
-                               let field =
-                                 Js.Opt.get (Dom_html.CoerceTo.select target)
-                                   (fun () -> assert false)
-                               in
-                               let value = Js.to_string field##.value in
-                               batch_problem :=
-                                 if value = "" then None
-                                 else Some (int_of_string value) ;
-                               batch_preview := None ;
-                               batch_notice := "" ;
-                               rerender () ;
-                               false ) ]
-                       @ if !batch_fetching then [a_disabled ()] else [] )
-                     ( option ~a:[a_value ""] (txt "Select a problem")
-                     :: List.map
-                          (fun id ->
-                            option
-                              ~a:
-                                ( [a_value (string_of_int id)]
-                                @ if !batch_problem = Some id then
-                                    [a_selected ()]
-                                  else [] )
-                              (txt (problem_code id)) )
-                          batch_problems )
-                 ; button
-                     ~a:
-                       ( [ a_button_type `Button
-                         ; a_class ["btn"; "btn-sm"; "btn-outline-primary"]
-                         ; a_title
-                             "Evaluate each user's latest submission for the selected problem"
-                         ; a_onclick (fun _ ->
-                               ( match (!batch_problem, llm_config) with
-                               | Some id, Some _ ->
-                                   evaluate_latest_for_problem id
-                               | _ -> () ) ;
-                               false ) ]
-                       @
-                       if
-                         !batch_fetching || !batch_problem = None
-                         || llm_config = None || !batch_preview <> None
-                       then [a_disabled ()]
-                       else [] )
-                     [ txt
-                         ( if !batch_fetching then "Fetching sources..."
-                           else "Evaluate latest per user" ) ] ] ]
-           else [] )
+        ::
+        ( if show_user then
+            [ div
+                ~a:[a_class ["d-flex"; "flex-wrap"; "gap-2"]]
+                [ label
+                    ~a:
+                      [ a_class ["visually-hidden"]
+                      ; a_label_for "judge-batch-problem" ]
+                    [txt "Problem for batch LLM evaluation"]
+                ; select
+                    ~a:
+                      ( [ a_id "judge-batch-problem"
+                        ; a_class ["form-select"; "form-select-sm"]
+                        ; a_style "width:auto;max-width:18rem"
+                        ; a_onchange (fun event ->
+                              let target =
+                                Js.Opt.get event##.target (fun () ->
+                                    assert false )
+                              in
+                              let field =
+                                Js.Opt.get (Dom_html.CoerceTo.select target)
+                                  (fun () -> assert false )
+                              in
+                              let value = Js.to_string field##.value in
+                              batch_problem :=
+                                if value = "" then None
+                                else Some (int_of_string value) ;
+                              batch_preview := None ;
+                              batch_notice := "" ;
+                              rerender () ;
+                              false ) ]
+                      @ if !batch_fetching then [a_disabled ()] else [] )
+                    ( option ~a:[a_value ""] (txt "Select a problem")
+                    :: List.map
+                         (fun id ->
+                           option
+                             ~a:
+                               ( [a_value (string_of_int id)]
+                               @
+                               if !batch_problem = Some id then
+                                 [a_selected ()]
+                               else [] )
+                             (txt (problem_code id)) )
+                         batch_problems )
+                ; button
+                    ~a:
+                      ( [ a_button_type `Button
+                        ; a_class ["btn"; "btn-sm"; "btn-outline-primary"]
+                        ; a_title
+                            "Evaluate each user's latest submission for the \
+                             selected problem"
+                        ; a_onclick (fun _ ->
+                              ( match (!batch_problem, llm_config) with
+                              | Some id, Some _ ->
+                                  evaluate_latest_for_problem id
+                              | _ -> () ) ;
+                              false ) ]
+                      @
+                      if
+                        !batch_fetching || !batch_problem = None
+                        || llm_config = None || !batch_preview <> None
+                      then [a_disabled ()]
+                      else [] )
+                    [ txt
+                        ( if !batch_fetching then "Fetching sources..."
+                          else "Evaluate latest per user" ) ] ] ]
+          else [] ) )
     ; ( if !batch_notice = "" || not show_user then div []
         else
           p
@@ -1413,9 +1422,14 @@ let content contest_id =
                               ~a:[a_class ["text-muted"; "small"]]
                               [txt "Ends"]
                           ; time
-                              ~a:[a_datetime details.end_time]
-                              [txt (format_contest_time details.end_time)] ]
-                      ] ] )
+                              ~a:
+                                [ a_datetime
+                                    (Option.value ~default:""
+                                       details.end_time ) ]
+                              [ txt
+                                  (format_contest_time
+                                     (Option.value ~default:""
+                                        details.end_time ) ) ] ] ] ] )
         ; (if !loading then p [txt "Loading submissions..."] else div [])
         ; ( if !message <> "" then
               p ~a:[a_class ["text-muted"]] [txt !message]
