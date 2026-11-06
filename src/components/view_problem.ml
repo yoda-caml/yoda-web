@@ -11,19 +11,8 @@ let problem_view (problem : Api.Openapi.problem) =
   View_problem_markdown.trigger_math_render description_dom ;
   section
     ~a:[a_class ["panel-section"]]
-    ( [ h2 [txt (problem.code ^ ". " ^ problem.title)]
-      ; p
-          [ b [txt (I18n.t "problem_time_limit"); txt ": "]
-          ; txt (Printf.sprintf "%d ms" problem.time_limit_ms) ]
-      ; p
-          [ b [txt (I18n.t "problem_memory_limit"); txt ": "]
-          ; txt (Printf.sprintf "%d MB" problem.memory_limit_mb) ]
-      ; p
-          [ b [txt (I18n.t "problems_languages_label"); txt ": "]
-          ; txt
-              ( if problem.languages = [] then "-"
-                else String.concat ", " problem.languages ) ]
-      ; h3 [txt (I18n.t "problem_description")]
+    ( [ (*h2 [txt (problem.code ^ ". " ^ problem.title)] ;*)
+        h3 [txt (I18n.t "problem_description")]
       ; description_html ]
     @ ( if problem.input_spec <> "" then
           [h3 [txt (I18n.t "problem_input")]; p [txt problem.input_spec]]
@@ -34,7 +23,7 @@ let problem_view (problem : Api.Openapi.problem) =
     else [] )
 
 let content ~contest_id ~problem_id () =
-  let subcontainer = div ~a:[a_class ["card-header"]] [] in
+  let subcontainer = div ~a:[a_class ["card-header"; "p-3"]] [] in
   let container =
     section
       ~a:[a_class ["panel-section"; "container"; "py-3"]]
@@ -60,9 +49,9 @@ let content ~contest_id ~problem_id () =
             Dom.appendChild
               (Tyxml_js.To_dom.of_div subcontainer)
               (Tyxml_js.To_dom.of_p (p [txt (I18n.t "problem_not_found")]))
-         | Some problem ->
-             Option.iter Model.Problem_state.mark_problem_viewed problem.id ;
-             Dom.appendChild
+        | Some problem ->
+            Option.iter Model.Problem_state.mark_problem_viewed problem.id ;
+            Dom.appendChild
               (Tyxml_js.To_dom.of_div subcontainer)
               (Tyxml_js.To_dom.of_section (problem_view problem)) ) ;
         Lwt.return_unit ) ;

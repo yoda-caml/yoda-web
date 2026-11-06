@@ -7,7 +7,9 @@ let render ?(contest_id = 1) ?(problem_id = "") () =
       ~a:[a_class ["flex-grow-1"]]
       [ main
           ~a:[a_class ["panel"]]
-          [Components.View_problem.content ~contest_id ~problem_id ()] ]
+          [ Components.View_problem_progress.content
+              ~contest_id ~problem_id ()
+          ; Components.View_problem.content ~contest_id ~problem_id () ] ]
   in
   match Helpers.layout () with
   | Helpers.Mobile ->

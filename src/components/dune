@@ -22,6 +22,7 @@
   view_problem_markdown
   view_problems
   view_contest_progress
+  view_problem_progress
   editor
   codebar
   tabbar_zip

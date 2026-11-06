@@ -161,6 +161,10 @@ type translations =
   ; progress_time_left_label: string
   ; progress_progress_label: string
   ; progress_title: string
+  ; problem_progress_title: string
+  ; problem_progress_open: string
+  ; problem_progress_upcoming: string
+  ; problem_progress_closed: string
   ; test_type_text: string
   ; test_type_json: string
   ; test_invalid_json: string
@@ -447,6 +451,10 @@ let en =
   ; progress_time_left_label= "Time Left: "
   ; progress_progress_label= "Progress"
   ; progress_title= "Contest Progress"
+  ; problem_progress_title= "Problem Progress"
+  ; problem_progress_open= "Open"
+  ; problem_progress_upcoming= "Upcoming"
+  ; problem_progress_closed= "Closed"
   ; test_type_text= "Text"
   ; test_type_json= "JSON"
   ; test_invalid_json= "Invalid JSON"
@@ -742,6 +750,10 @@ let de =
   ; progress_time_left_label= "Verbleibende Zeit: "
   ; progress_progress_label= "Fortschritt"
   ; progress_title= "Wettbewerbsfortschritt"
+  ; problem_progress_title= "Aufgabenfortschritt"
+  ; problem_progress_open= "Offen"
+  ; problem_progress_upcoming= "Bevorstehend"
+  ; problem_progress_closed= "Geschlossen"
   ; test_type_text= "Text"
   ; test_type_json= "JSON"
   ; test_invalid_json= "Ungültiges JSON"
@@ -1043,6 +1055,10 @@ let fr =
   ; progress_time_left_label= "Temps restant : "
   ; progress_progress_label= "Progression"
   ; progress_title= "Progression du concours"
+  ; problem_progress_title= "Progression du problème"
+  ; problem_progress_open= "Ouvert"
+  ; problem_progress_upcoming= "À venir"
+  ; problem_progress_closed= "Fermé"
   ; test_type_text= "Texte"
   ; test_type_json= "JSON"
   ; test_invalid_json= "JSON invalide"
@@ -1343,6 +1359,10 @@ let es =
   ; progress_time_left_label= "Tiempo restante: "
   ; progress_progress_label= "Progreso"
   ; progress_title= "Progreso del concurso"
+  ; problem_progress_title= "Progreso del problema"
+  ; problem_progress_open= "Abierto"
+  ; problem_progress_upcoming= "Próximamente"
+  ; problem_progress_closed= "Cerrado"
   ; test_type_text= "Texto"
   ; test_type_json= "JSON"
   ; test_invalid_json= "JSON inválido"
@@ -1639,6 +1659,10 @@ let pt =
   ; progress_time_left_label= "Tempo restante: "
   ; progress_progress_label= "Progresso"
   ; progress_title= "Progresso do concurso"
+  ; problem_progress_title= "Progresso do problema"
+  ; problem_progress_open= "Aberto"
+  ; problem_progress_upcoming= "Em breve"
+  ; problem_progress_closed= "Encerrado"
   ; test_type_text= "Texto"
   ; test_type_json= "JSON"
   ; test_invalid_json= "JSON inválido"
@@ -1926,6 +1950,10 @@ let ar =
   ; progress_time_left_label= "الوقت المتبقي: "
   ; progress_progress_label= "التقدم"
   ; progress_title= "تقدم المسابقة"
+  ; problem_progress_title= "تقدم المسألة"
+  ; problem_progress_open= "مفتوح"
+  ; problem_progress_upcoming= "قادم"
+  ; problem_progress_closed= "مغلق"
   ; test_type_text= "نص"
   ; test_type_json= "JSON"
   ; test_invalid_json= "JSON غير صالح"
@@ -2206,6 +2234,10 @@ let map : translations -> (string, string) Hashtbl.t =
   add "progress_time_left_label" tr.progress_time_left_label ;
   add "progress_progress_label" tr.progress_progress_label ;
   add "progress_title" tr.progress_title ;
+  add "problem_progress_title" tr.problem_progress_title ;
+  add "problem_progress_open" tr.problem_progress_open ;
+  add "problem_progress_upcoming" tr.problem_progress_upcoming ;
+  add "problem_progress_closed" tr.problem_progress_closed ;
   add "test_type_text" tr.test_type_text ;
   add "test_type_json" tr.test_type_json ;
   add "test_invalid_json" tr.test_invalid_json ;
