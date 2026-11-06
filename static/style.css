@@ -521,9 +521,15 @@ body {
 }
 
 .markdown-content pre {
-  padding: 14px;
+  padding: 14px 16px;
   border-radius: 10px;
   overflow-x: auto;
+  background-color: var(--bs-tertiary-bg);
+  color: var(--bs-body-color);
+  border: 1px solid var(--bs-border-color);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin: 16px 0;
 }
 
 .markdown-content blockquote {
