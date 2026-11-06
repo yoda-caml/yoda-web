@@ -1,6 +1,6 @@
 open Js_of_ocaml
 
-type language = EN | FR | ES | PT | AR
+type language = EN | FR | ES | PT | AR | DE
 
 let language_of_code = function
   | "en" -> EN
@@ -8,6 +8,7 @@ let language_of_code = function
   | "es" -> ES
   | "pt" -> PT
   | "ar" -> AR
+  | "de" -> DE
   | _ -> EN
 
 let language_to_code = function
@@ -16,6 +17,7 @@ let language_to_code = function
   | ES -> "es"
   | PT -> "pt"
   | AR -> "ar"
+  | DE -> "de"
 
 let apply_direction lang =
   let dir = match lang with AR -> "rtl" | _ -> "ltr" in
@@ -42,6 +44,7 @@ let languages =
   [ (EN, "English")
   ; (FR, "Français")
   ; (ES, "Español")
+  ; (DE, "Deutsch")
   ; (PT, "Português")
   ; (AR, "العربية") ]
 
@@ -52,6 +55,7 @@ let get_translations () =
   | ES -> Translations.es
   | PT -> Translations.pt
   | AR -> Translations.ar
+  | DE -> Translations.de
 
 let t key =
   let tr = get_translations () in
@@ -105,3 +109,4 @@ let init () =
   | ES -> set_language ES
   | PT -> set_language PT
   | AR -> set_language AR
+  | DE -> set_language DE

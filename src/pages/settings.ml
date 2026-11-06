@@ -97,15 +97,8 @@ let get_lang () =
   | None -> "en"
 
 let set_lang code =
-  let lang =
-    match code with
-    | "fr" -> I18n.FR
-    | "es" -> I18n.ES
-    | "pt" -> I18n.PT
-    | "ar" -> I18n.AR
-    | _ -> I18n.EN
-  in
-  I18n.set_language lang ; Helpers.trigger_render ()
+  I18n.set_language (I18n.language_of_code code) ;
+  Helpers.trigger_render ()
 
 (** Apply a theme to the UI *)
 let apply_theme t =
@@ -171,16 +164,7 @@ let render_settings_tab () =
   let lang = get_lang () in
   let languages =
     List.map
-      (fun (l, name) ->
-        let code =
-          match l with
-          | I18n.EN -> "en"
-          | I18n.FR -> "fr"
-          | I18n.ES -> "es"
-          | I18n.PT -> "pt"
-          | I18n.AR -> "ar"
-        in
-        (code, name) )
+      (fun (l, name) -> (I18n.language_to_code l, name))
       I18n.languages
   in
   div
