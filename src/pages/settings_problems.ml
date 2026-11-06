@@ -638,6 +638,8 @@ let problem_languages_input_id = "problem-languages-input"
 
 let problem_force_closed_input_id = "problem-force-closed-input"
 
+let problem_draft_input_id = "problem-draft-input"
+
 let problem_description_input_id = "problem-description-input"
 
 let problem_input_spec_input_id = "problem-input-spec-input"
@@ -759,6 +761,7 @@ let submit_problem_modal ~mode ~default_time_limit_ms
   let input_spec = get_textarea_value problem_input_spec_input_id in
   let output_spec = get_textarea_value problem_output_spec_input_id in
   let is_force_closed = get_checkbox_value problem_force_closed_input_id in
+  let is_draft = get_checkbox_value problem_draft_input_id in
   if code = "" || title = "" then (
     error_msg :=
       Some
@@ -780,7 +783,8 @@ let submit_problem_modal ~mode ~default_time_limit_ms
               let body =
                 Api.Openapi.ProblemCreateRequest.create ~code ~title
                   ~description ~input_spec ~output_spec ~languages
-                  ~time_limit_ms ~memory_limit_mb ~source_artifacts:[] ()
+                  ~time_limit_ms ~memory_limit_mb ~source_artifacts:[]
+                  ~is_draft ()
                 |> Api.Openapi.ProblemCreateRequest.to_json
               in
               Api.Helpers.post_problem contest_id body
@@ -792,7 +796,7 @@ let submit_problem_modal ~mode ~default_time_limit_ms
                   Api.Openapi.ProblemUpdateRequest.create ~code ~title
                     ~description ~input_spec ~output_spec ~languages ?open_at
                     ?close_at ~time_limit_ms ~memory_limit_mb
-                    ~is_force_closed ()
+                    ~is_force_closed ~is_draft ()
                   |> Api.Openapi.ProblemUpdateRequest.to_json
                 in
                 Api.Helpers.put_problem problem_id body )
@@ -827,7 +831,8 @@ let make_problem_modal () =
           , input_spec
           , output_spec
           , languages
-          , is_force_closed ) =
+          , is_force_closed
+          , is_draft ) =
         match mode with
         | Create p | Edit p ->
             ( p.code
@@ -840,8 +845,9 @@ let make_problem_modal () =
             , p.input_spec
             , p.output_spec
             , String.concat ", " p.languages
-            , Option.value ~default:false p.is_force_closed )
-        | None_ -> ("", "", 0, 0, "", "", "", "", "", "", false)
+            , Option.value ~default:false p.is_force_closed
+            , Option.value ~default:false p.is_draft )
+        | None_ -> ("", "", 0, 0, "", "", "", "", "", "", false, false)
       in
       div
         ~a:[a_id problem_modal_id]
@@ -853,7 +859,7 @@ let make_problem_modal () =
               [ a_class ["modal"; "fade"; "show"]
               ; a_style "display:block; z-index:1050;" ]
             [ div
-                ~a:[a_class ["modal-dialog"; "modal-lg"]]
+                ~a:[a_class ["modal-dialog"; "modal-xl"]]
                 [ div
                     ~a:[a_class ["modal-content"]]
                     [ (* Header *)
@@ -983,6 +989,26 @@ let make_problem_modal () =
                                       ; a_placeholder "python, java, cpp"
                                       ; a_value languages ]
                                     () ]
+                            ; (* Draft *)
+                              div
+                                ~a:[a_class ["col-12"]]
+                                [ div
+                                    ~a:[a_class ["form-check"; "form-switch"]]
+                                    [ input
+                                        ~a:
+                                          ( [ a_id problem_draft_input_id
+                                            ; a_input_type `Checkbox
+                                            ; a_class ["form-check-input"] ]
+                                          @
+                                          if is_draft then [a_checked ()]
+                                          else [] )
+                                        ()
+                                    ; label
+                                        ~a:
+                                          [ a_class ["form-check-label"]
+                                          ; a_label_for
+                                              problem_draft_input_id ]
+                                        [txt "Draft"] ] ]
                             ; (* Force closed *)
                               div
                                 ~a:[a_class ["col-12"]]
@@ -1000,8 +1026,10 @@ let make_problem_modal () =
                                      [ input ~a:force_closed_attrs ()
                                      ; label
                                          ~a:[a_class ["form-check-label"]]
-                                         [txt (I18n.t "problems_force_closed_label")]
-                                    ] ) ]
+                                         [ txt
+                                             (I18n.t
+                                                "problems_force_closed_label" )
+                                         ] ] ) ]
                             ; (* Description *)
                               div
                                 ~a:[a_class ["col-12"]]
@@ -1014,7 +1042,7 @@ let make_problem_modal () =
                                     ~a:
                                       [ a_id problem_description_input_id
                                       ; a_class ["form-control"]
-                                      ; a_rows 4
+                                      ; a_rows 10
                                       ; a_placeholder
                                           "Problem description..."
                                         (*; a_value description*) ]
@@ -1845,6 +1873,7 @@ let render_problems_tab () =
                       ; open_at= None
                       ; close_at= None
                       ; is_force_closed= Some false
+                      ; is_draft= Some false
                       ; languages= []
                       ; source_artifacts= None
                       ; object_artifacts= None } ;

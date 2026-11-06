@@ -1753,10 +1753,15 @@ type problemUpdateRequest = {
   memory_limit_mb: int option;
   source_artifacts: sourceArtifacts option;
   object_artifacts: objectArtifacts option;
+  is_draft: bool option;
+  (**
+     Keep the problem hidden from participants while it is being
+     configured.
+  *)
 }
 
-let create_problemUpdateRequest ?code ?title ?description ?input_spec ?output_spec ?open_at ?close_at ?is_force_closed ?languages ?time_limit_ms ?memory_limit_mb ?source_artifacts ?object_artifacts () : problemUpdateRequest =
-  { code; title; description; input_spec; output_spec; open_at; close_at; is_force_closed; languages; time_limit_ms; memory_limit_mb; source_artifacts; object_artifacts }
+let create_problemUpdateRequest ?code ?title ?description ?input_spec ?output_spec ?open_at ?close_at ?is_force_closed ?languages ?time_limit_ms ?memory_limit_mb ?source_artifacts ?object_artifacts ?is_draft () : problemUpdateRequest =
+  { code; title; description; input_spec; output_spec; open_at; close_at; is_force_closed; languages; time_limit_ms; memory_limit_mb; source_artifacts; object_artifacts; is_draft }
 
 let problemUpdateRequest_of_yojson (x : Yojson.Safe.t) : problemUpdateRequest =
   match x with
@@ -1836,7 +1841,12 @@ let problemUpdateRequest_of_yojson (x : Yojson.Safe.t) : problemUpdateRequest =
       | None | Some `Null -> Option.None
       | Some v -> Option.Some (objectArtifacts_of_yojson v)
     in
-    { code; title; description; input_spec; output_spec; open_at; close_at; is_force_closed; languages; time_limit_ms; memory_limit_mb; source_artifacts; object_artifacts }
+    let is_draft =
+      match assoc "is_draft" with
+      | None | Some `Null -> Option.None
+      | Some v -> Option.Some (Atdml_runtime.Yojson.bool_of_yojson v)
+    in
+    { code; title; description; input_spec; output_spec; open_at; close_at; is_force_closed; languages; time_limit_ms; memory_limit_mb; source_artifacts; object_artifacts; is_draft }
   | _ -> Atdml_runtime.Yojson.bad_type "problemUpdateRequest" x
 
 let yojson_of_problemUpdateRequest (x : problemUpdateRequest) : Yojson.Safe.t =
@@ -1854,6 +1864,7 @@ let yojson_of_problemUpdateRequest (x : problemUpdateRequest) : Yojson.Safe.t =
     (match x.memory_limit_mb with None -> [] | Some v -> [("memory_limit_mb", Atdml_runtime.Yojson.yojson_of_int v)]);
     (match x.source_artifacts with None -> [] | Some v -> [("source_artifacts", yojson_of_sourceArtifacts v)]);
     (match x.object_artifacts with None -> [] | Some v -> [("object_artifacts", yojson_of_objectArtifacts v)]);
+    (match x.is_draft with None -> [] | Some v -> [("is_draft", Atdml_runtime.Yojson.yojson_of_bool v)]);
   ])
 
 let problemUpdateRequest_of_json s =
@@ -1881,10 +1892,15 @@ type problemCreateRequest = {
   time_limit_ms: int;
   memory_limit_mb: int;
   source_artifacts: sourceArtifacts;
+  is_draft: bool option;
+  (**
+     Keep the problem hidden from participants while it is being
+     configured.
+  *)
 }
 
-let create_problemCreateRequest ~code ~title ~description ~input_spec ~output_spec ~languages ~time_limit_ms ~memory_limit_mb ~source_artifacts () : problemCreateRequest =
-  { code; title; description; input_spec; output_spec; languages; time_limit_ms; memory_limit_mb; source_artifacts }
+let create_problemCreateRequest ~code ~title ~description ~input_spec ~output_spec ~languages ~time_limit_ms ~memory_limit_mb ~source_artifacts ?is_draft () : problemCreateRequest =
+  { code; title; description; input_spec; output_spec; languages; time_limit_ms; memory_limit_mb; source_artifacts; is_draft }
 
 let problemCreateRequest_of_yojson (x : Yojson.Safe.t) : problemCreateRequest =
   match x with
@@ -1944,7 +1960,12 @@ let problemCreateRequest_of_yojson (x : Yojson.Safe.t) : problemCreateRequest =
       | Some v -> sourceArtifacts_of_yojson v
       | None -> Atdml_runtime.Yojson.missing_field "problemCreateRequest" "source_artifacts"
     in
-    { code; title; description; input_spec; output_spec; languages; time_limit_ms; memory_limit_mb; source_artifacts }
+    let is_draft =
+      match assoc "is_draft" with
+      | None | Some `Null -> Option.None
+      | Some v -> Option.Some (Atdml_runtime.Yojson.bool_of_yojson v)
+    in
+    { code; title; description; input_spec; output_spec; languages; time_limit_ms; memory_limit_mb; source_artifacts; is_draft }
   | _ -> Atdml_runtime.Yojson.bad_type "problemCreateRequest" x
 
 let yojson_of_problemCreateRequest (x : problemCreateRequest) : Yojson.Safe.t =
@@ -1958,6 +1979,7 @@ let yojson_of_problemCreateRequest (x : problemCreateRequest) : Yojson.Safe.t =
     [("time_limit_ms", Atdml_runtime.Yojson.yojson_of_int x.time_limit_ms)];
     [("memory_limit_mb", Atdml_runtime.Yojson.yojson_of_int x.memory_limit_mb)];
     [("source_artifacts", yojson_of_sourceArtifacts x.source_artifacts)];
+    (match x.is_draft with None -> [] | Some v -> [("is_draft", Atdml_runtime.Yojson.yojson_of_bool v)]);
   ])
 
 let problemCreateRequest_of_json s =
@@ -1987,13 +2009,18 @@ type problem = {
   open_at: string option;  (** Optional date/time from which the problem is open. *)
   close_at: string option;  (** Optional date/time after which the problem is closed. *)
   is_force_closed: bool option;  (** True when the problem has been manually stopped by an admin. *)
+  is_draft: bool option;
+  (**
+     True while the problem is being configured and hidden from
+     participants.
+  *)
   languages: languages;
   source_artifacts: sourceArtifacts option;
   object_artifacts: objectArtifacts option;
 }
 
-let create_problem ?id ~code ~title ~time_limit_ms ~memory_limit_mb ~description ~input_spec ~output_spec ?open_at ?close_at ?is_force_closed ~languages ?source_artifacts ?object_artifacts () : problem =
-  { id; code; title; time_limit_ms; memory_limit_mb; description; input_spec; output_spec; open_at; close_at; is_force_closed; languages; source_artifacts; object_artifacts }
+let create_problem ?id ~code ~title ~time_limit_ms ~memory_limit_mb ~description ~input_spec ~output_spec ?open_at ?close_at ?is_force_closed ?is_draft ~languages ?source_artifacts ?object_artifacts () : problem =
+  { id; code; title; time_limit_ms; memory_limit_mb; description; input_spec; output_spec; open_at; close_at; is_force_closed; is_draft; languages; source_artifacts; object_artifacts }
 
 let problem_of_yojson (x : Yojson.Safe.t) : problem =
   match x with
@@ -2063,6 +2090,11 @@ let problem_of_yojson (x : Yojson.Safe.t) : problem =
       | None | Some `Null -> Option.None
       | Some v -> Option.Some (Atdml_runtime.Yojson.bool_of_yojson v)
     in
+    let is_draft =
+      match assoc "is_draft" with
+      | None | Some `Null -> Option.None
+      | Some v -> Option.Some (Atdml_runtime.Yojson.bool_of_yojson v)
+    in
     let languages =
       match assoc "languages" with
       | Some v -> languages_of_yojson v
@@ -2078,7 +2110,7 @@ let problem_of_yojson (x : Yojson.Safe.t) : problem =
       | None | Some `Null -> Option.None
       | Some v -> Option.Some (objectArtifacts_of_yojson v)
     in
-    { id; code; title; time_limit_ms; memory_limit_mb; description; input_spec; output_spec; open_at; close_at; is_force_closed; languages; source_artifacts; object_artifacts }
+    { id; code; title; time_limit_ms; memory_limit_mb; description; input_spec; output_spec; open_at; close_at; is_force_closed; is_draft; languages; source_artifacts; object_artifacts }
   | _ -> Atdml_runtime.Yojson.bad_type "problem" x
 
 let yojson_of_problem (x : problem) : Yojson.Safe.t =
@@ -2094,6 +2126,7 @@ let yojson_of_problem (x : problem) : Yojson.Safe.t =
     (match x.open_at with None -> [] | Some v -> [("open_at", Atdml_runtime.Yojson.yojson_of_string v)]);
     (match x.close_at with None -> [] | Some v -> [("close_at", Atdml_runtime.Yojson.yojson_of_string v)]);
     (match x.is_force_closed with None -> [] | Some v -> [("is_force_closed", Atdml_runtime.Yojson.yojson_of_bool v)]);
+    (match x.is_draft with None -> [] | Some v -> [("is_draft", Atdml_runtime.Yojson.yojson_of_bool v)]);
     [("languages", yojson_of_languages x.languages)];
     (match x.source_artifacts with None -> [] | Some v -> [("source_artifacts", yojson_of_sourceArtifacts v)]);
     (match x.object_artifacts with None -> [] | Some v -> [("object_artifacts", yojson_of_objectArtifacts v)]);

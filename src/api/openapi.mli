@@ -638,9 +638,14 @@ type problemUpdateRequest = {
   memory_limit_mb: int option;
   source_artifacts: sourceArtifacts option;
   object_artifacts: objectArtifacts option;
+  is_draft: bool option;
+  (**
+     Keep the problem hidden from participants while it is being
+     configured.
+  *)
 }
 
-val create_problemUpdateRequest : ?code:string -> ?title:string -> ?description:string -> ?input_spec:string -> ?output_spec:string -> ?open_at:string -> ?close_at:string -> ?is_force_closed:bool -> ?languages:languages -> ?time_limit_ms:int -> ?memory_limit_mb:int -> ?source_artifacts:sourceArtifacts -> ?object_artifacts:objectArtifacts -> unit -> problemUpdateRequest
+val create_problemUpdateRequest : ?code:string -> ?title:string -> ?description:string -> ?input_spec:string -> ?output_spec:string -> ?open_at:string -> ?close_at:string -> ?is_force_closed:bool -> ?languages:languages -> ?time_limit_ms:int -> ?memory_limit_mb:int -> ?source_artifacts:sourceArtifacts -> ?object_artifacts:objectArtifacts -> ?is_draft:bool -> unit -> problemUpdateRequest
 val problemUpdateRequest_of_yojson : Yojson.Safe.t -> problemUpdateRequest
 val yojson_of_problemUpdateRequest : problemUpdateRequest -> Yojson.Safe.t
 val problemUpdateRequest_of_json : string -> problemUpdateRequest
@@ -648,7 +653,7 @@ val json_of_problemUpdateRequest : problemUpdateRequest -> string
 
 module ProblemUpdateRequest : sig
   type nonrec t = problemUpdateRequest
-  val create : ?code:string -> ?title:string -> ?description:string -> ?input_spec:string -> ?output_spec:string -> ?open_at:string -> ?close_at:string -> ?is_force_closed:bool -> ?languages:languages -> ?time_limit_ms:int -> ?memory_limit_mb:int -> ?source_artifacts:sourceArtifacts -> ?object_artifacts:objectArtifacts -> unit -> t
+  val create : ?code:string -> ?title:string -> ?description:string -> ?input_spec:string -> ?output_spec:string -> ?open_at:string -> ?close_at:string -> ?is_force_closed:bool -> ?languages:languages -> ?time_limit_ms:int -> ?memory_limit_mb:int -> ?source_artifacts:sourceArtifacts -> ?object_artifacts:objectArtifacts -> ?is_draft:bool -> unit -> t
   val of_yojson : Yojson.Safe.t -> t
   val to_yojson : t -> Yojson.Safe.t
   val of_json : string -> t
@@ -665,9 +670,14 @@ type problemCreateRequest = {
   time_limit_ms: int;
   memory_limit_mb: int;
   source_artifacts: sourceArtifacts;
+  is_draft: bool option;
+  (**
+     Keep the problem hidden from participants while it is being
+     configured.
+  *)
 }
 
-val create_problemCreateRequest : code:string -> title:string -> description:string -> input_spec:string -> output_spec:string -> languages:languages -> time_limit_ms:int -> memory_limit_mb:int -> source_artifacts:sourceArtifacts -> unit -> problemCreateRequest
+val create_problemCreateRequest : code:string -> title:string -> description:string -> input_spec:string -> output_spec:string -> languages:languages -> time_limit_ms:int -> memory_limit_mb:int -> source_artifacts:sourceArtifacts -> ?is_draft:bool -> unit -> problemCreateRequest
 val problemCreateRequest_of_yojson : Yojson.Safe.t -> problemCreateRequest
 val yojson_of_problemCreateRequest : problemCreateRequest -> Yojson.Safe.t
 val problemCreateRequest_of_json : string -> problemCreateRequest
@@ -675,7 +685,7 @@ val json_of_problemCreateRequest : problemCreateRequest -> string
 
 module ProblemCreateRequest : sig
   type nonrec t = problemCreateRequest
-  val create : code:string -> title:string -> description:string -> input_spec:string -> output_spec:string -> languages:languages -> time_limit_ms:int -> memory_limit_mb:int -> source_artifacts:sourceArtifacts -> unit -> t
+  val create : code:string -> title:string -> description:string -> input_spec:string -> output_spec:string -> languages:languages -> time_limit_ms:int -> memory_limit_mb:int -> source_artifacts:sourceArtifacts -> ?is_draft:bool -> unit -> t
   val of_yojson : Yojson.Safe.t -> t
   val to_yojson : t -> Yojson.Safe.t
   val of_json : string -> t
@@ -694,12 +704,17 @@ type problem = {
   open_at: string option;  (** Optional date/time from which the problem is open. *)
   close_at: string option;  (** Optional date/time after which the problem is closed. *)
   is_force_closed: bool option;  (** True when the problem has been manually stopped by an admin. *)
+  is_draft: bool option;
+  (**
+     True while the problem is being configured and hidden from
+     participants.
+  *)
   languages: languages;
   source_artifacts: sourceArtifacts option;
   object_artifacts: objectArtifacts option;
 }
 
-val create_problem : ?id:int -> code:string -> title:string -> time_limit_ms:int -> memory_limit_mb:int -> description:string -> input_spec:string -> output_spec:string -> ?open_at:string -> ?close_at:string -> ?is_force_closed:bool -> languages:languages -> ?source_artifacts:sourceArtifacts -> ?object_artifacts:objectArtifacts -> unit -> problem
+val create_problem : ?id:int -> code:string -> title:string -> time_limit_ms:int -> memory_limit_mb:int -> description:string -> input_spec:string -> output_spec:string -> ?open_at:string -> ?close_at:string -> ?is_force_closed:bool -> ?is_draft:bool -> languages:languages -> ?source_artifacts:sourceArtifacts -> ?object_artifacts:objectArtifacts -> unit -> problem
 val problem_of_yojson : Yojson.Safe.t -> problem
 val yojson_of_problem : problem -> Yojson.Safe.t
 val problem_of_json : string -> problem
@@ -707,7 +722,7 @@ val json_of_problem : problem -> string
 
 module Problem : sig
   type nonrec t = problem
-  val create : ?id:int -> code:string -> title:string -> time_limit_ms:int -> memory_limit_mb:int -> description:string -> input_spec:string -> output_spec:string -> ?open_at:string -> ?close_at:string -> ?is_force_closed:bool -> languages:languages -> ?source_artifacts:sourceArtifacts -> ?object_artifacts:objectArtifacts -> unit -> t
+  val create : ?id:int -> code:string -> title:string -> time_limit_ms:int -> memory_limit_mb:int -> description:string -> input_spec:string -> output_spec:string -> ?open_at:string -> ?close_at:string -> ?is_force_closed:bool -> ?is_draft:bool -> languages:languages -> ?source_artifacts:sourceArtifacts -> ?object_artifacts:objectArtifacts -> unit -> t
   val of_yojson : Yojson.Safe.t -> t
   val to_yojson : t -> Yojson.Safe.t
   val of_json : string -> t

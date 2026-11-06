@@ -121,16 +121,19 @@ let save () =
   else if
     String.trim !title = ""
     || String.trim !start_time = ""
-    || String.trim !end_time = ""
+    || String.trim !status = ""
   then (
-    error := Some "Title, start time and end time are required." ;
+    error := Some "Title, start time and status are required." ;
     Helpers.trigger_render () ;
     Lwt.return_unit )
   else
     let start = Settings_problems.datetime_local_to_api_value !start_time in
     let finish = Settings_problems.datetime_local_to_api_value !end_time in
     match (start, finish) with
-    | Some start, Some finish when start < finish ->
+    | Some start, finish
+      when match finish with
+           | None -> String.trim !end_time = ""
+           | Some end_time -> start < end_time ->
         busy := true ;
         error := None ;
         notice := None ;
@@ -139,10 +142,13 @@ let save () =
           [ ("title", `String (String.trim !title))
           ; ("description", `String (String.trim !description))
           ; ("start_time", `String start)
-          ; ("end_time", `String finish)
           ; ( "status"
             , Api.Openapi.ContestCreateRequestStatus.to_yojson
                 (status_of_string !status) ) ]
+          @
+          match finish with
+          | None -> []
+          | Some end_time -> [("end_time", `String end_time)]
         in
         let body = Yojson.Safe.to_string (`Assoc fields) in
         let request =
