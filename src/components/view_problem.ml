@@ -22,7 +22,7 @@ let problem_view (problem : Api.Openapi.problem) =
       [h3 [txt (I18n.t "problem_output")]; p [txt problem.output_spec]]
     else [] )
 
-let content ~contest_id ~problem_id () =
+let content ~(problem : (Api.Openapi.problem option, int) result Lwt.t) () =
   let subcontainer = div ~a:[a_class ["card-header"; "p-3"]] [] in
   let container =
     section
@@ -30,29 +30,18 @@ let content ~contest_id ~problem_id () =
       [div ~a:[a_class ["card"; "shadow-sm"]] [subcontainer]]
   in
   Lwt.async (fun () ->
-      Api.Helpers.get_problems contest_id
-      >>= fun (resp, status) ->
-      if status <> 200 then (
-        Console.console##log
-          (Js.string (Printf.sprintf "Failed to fetch problems: %d" status)) ;
-        Lwt.return_unit )
-      else
-        let problems =
-          Api.Openapi.ContestsContestsidProblemsGetResponse2.of_yojson resp
-        in
-        ( match
-            List.find_opt
-              (fun (p : Api.Openapi.problem) -> p.code = problem_id)
-              problems
-          with
-        | None ->
-            Dom.appendChild
-              (Tyxml_js.To_dom.of_div subcontainer)
-              (Tyxml_js.To_dom.of_p (p [txt (I18n.t "problem_not_found")]))
-        | Some problem ->
-            Option.iter Model.Problem_state.mark_problem_viewed problem.id ;
-            Dom.appendChild
-              (Tyxml_js.To_dom.of_div subcontainer)
-              (Tyxml_js.To_dom.of_section (problem_view problem)) ) ;
-        Lwt.return_unit ) ;
+      problem
+      >>= function
+      | Error _ -> Lwt.return_unit
+      | Ok None ->
+          Dom.appendChild
+            (Tyxml_js.To_dom.of_div subcontainer)
+            (Tyxml_js.To_dom.of_p (p [txt (I18n.t "problem_not_found")])) ;
+          Lwt.return_unit
+      | Ok (Some problem) ->
+          Option.iter Model.Problem_state.mark_problem_viewed problem.id ;
+          Dom.appendChild
+            (Tyxml_js.To_dom.of_div subcontainer)
+            (Tyxml_js.To_dom.of_section (problem_view problem)) ;
+          Lwt.return_unit ) ;
   container
