@@ -247,6 +247,7 @@ type translations =
   ; problems_time_limit_label: string
   ; problems_memory_limit_label: string
   ; problems_languages_label: string
+  ; problems_disable_submissions_label: string
   ; problems_force_closed_label: string
   ; problems_description_label: string
   ; problems_input_spec_label: string
@@ -541,6 +542,7 @@ let en =
   ; problems_time_limit_label= "Time Limit (ms)"
   ; problems_memory_limit_label= "Memory Limit (MB)"
   ; problems_languages_label= "Languages"
+  ; problems_disable_submissions_label= "Disable submissions"
   ; problems_force_closed_label= "Force closed"
   ; problems_description_label= "Description"
   ; problems_input_spec_label= "Input Specification"
@@ -845,6 +847,7 @@ let de =
   ; problems_time_limit_label= "Zeitlimit (ms)"
   ; problems_memory_limit_label= "Speicherlimit (MB)"
   ; problems_languages_label= "Sprachen"
+  ; problems_disable_submissions_label= "Einreichungen deaktivieren"
   ; problems_force_closed_label= "Zwangsweise geschlossen"
   ; problems_description_label= "Beschreibung"
   ; problems_input_spec_label= "Eingabeformat"
@@ -1152,6 +1155,7 @@ let fr =
   ; problems_time_limit_label= "Limite de temps (ms)"
   ; problems_memory_limit_label= "Limite de mémoire (MB)"
   ; problems_languages_label= "Langages"
+  ; problems_disable_submissions_label= "Désactiver les soumissions"
   ; problems_force_closed_label= "Fermeture forcée"
   ; problems_description_label= "Description"
   ; problems_input_spec_label= "Spécification d'entrée"
@@ -1453,6 +1457,7 @@ let es =
   ; problems_time_limit_label= "Límite de tiempo (ms)"
   ; problems_memory_limit_label= "Límite de memoria (MB)"
   ; problems_languages_label= "Idiomas"
+  ; problems_disable_submissions_label= "Desactivar envíos"
   ; problems_force_closed_label= "Cierre forzado"
   ; problems_description_label= "Descripción"
   ; problems_input_spec_label= "Especificación de entrada"
@@ -1752,6 +1757,7 @@ let pt =
   ; problems_time_limit_label= "Limite de tempo (ms)"
   ; problems_memory_limit_label= "Limite de memória (MB)"
   ; problems_languages_label= "Idiomas"
+  ; problems_disable_submissions_label= "Desativar submissões"
   ; problems_force_closed_label= "Fecho forçado"
   ; problems_description_label= "Descrição"
   ; problems_input_spec_label= "Especificação de entrada"
@@ -2039,6 +2045,7 @@ let ar =
   ; problems_time_limit_label= "الحد الزمني (مللي ثانية)"
   ; problems_memory_limit_label= "حد الذاكرة (ميغابايت)"
   ; problems_languages_label= "اللغات"
+  ; problems_disable_submissions_label= "تعطيل الإرسالات"
   ; problems_force_closed_label= "إغلاق إجباري"
   ; problems_description_label= "الوصف"
   ; problems_input_spec_label= "مواصفات الإدخال"
@@ -2323,6 +2330,8 @@ let map : translations -> (string, string) Hashtbl.t =
   add "problems_time_limit_label" tr.problems_time_limit_label ;
   add "problems_memory_limit_label" tr.problems_memory_limit_label ;
   add "problems_languages_label" tr.problems_languages_label ;
+  add "problems_disable_submissions_label"
+    tr.problems_disable_submissions_label ;
   add "problems_force_closed_label" tr.problems_force_closed_label ;
   add "problems_description_label" tr.problems_description_label ;
   add "problems_input_spec_label" tr.problems_input_spec_label ;

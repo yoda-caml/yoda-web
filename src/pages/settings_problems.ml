@@ -640,6 +640,9 @@ let problem_force_closed_input_id = "problem-force-closed-input"
 
 let problem_draft_input_id = "problem-draft-input"
 
+let problem_submission_disabled_input_id =
+  "problem-submission-disabled-input"
+
 let problem_description_input_id = "problem-description-input"
 
 let problem_input_spec_input_id = "problem-input-spec-input"
@@ -762,6 +765,9 @@ let submit_problem_modal ~mode ~default_time_limit_ms
   let output_spec = get_textarea_value problem_output_spec_input_id in
   let is_force_closed = get_checkbox_value problem_force_closed_input_id in
   let is_draft = get_checkbox_value problem_draft_input_id in
+  let is_submission_disabled =
+    get_checkbox_value problem_submission_disabled_input_id
+  in
   if code = "" || title = "" then (
     error_msg :=
       Some
@@ -784,7 +790,7 @@ let submit_problem_modal ~mode ~default_time_limit_ms
                 Api.Openapi.ProblemCreateRequest.create ~code ~title
                   ~description ~input_spec ~output_spec ~languages
                   ~time_limit_ms ~memory_limit_mb ~source_artifacts:[]
-                  ~is_draft ()
+                  ~is_submission_disabled ~is_draft ()
                 |> Api.Openapi.ProblemCreateRequest.to_json
               in
               Api.Helpers.post_problem contest_id body
@@ -796,7 +802,7 @@ let submit_problem_modal ~mode ~default_time_limit_ms
                   Api.Openapi.ProblemUpdateRequest.create ~code ~title
                     ~description ~input_spec ~output_spec ~languages ?open_at
                     ?close_at ~time_limit_ms ~memory_limit_mb
-                    ~is_force_closed ~is_draft ()
+                    ~is_force_closed ~is_submission_disabled ~is_draft ()
                   |> Api.Openapi.ProblemUpdateRequest.to_json
                 in
                 Api.Helpers.put_problem problem_id body )
@@ -832,7 +838,8 @@ let make_problem_modal () =
           , output_spec
           , languages
           , is_force_closed
-          , is_draft ) =
+          , is_draft
+          , is_submission_disabled ) =
         match mode with
         | Create p | Edit p ->
             ( p.code
@@ -846,8 +853,9 @@ let make_problem_modal () =
             , p.output_spec
             , String.concat ", " p.languages
             , Option.value ~default:false p.is_force_closed
-            , Option.value ~default:false p.is_draft )
-        | None_ -> ("", "", 0, 0, "", "", "", "", "", "", false, false)
+            , Option.value ~default:false p.is_draft
+            , Option.value ~default:false p.is_submission_disabled )
+        | None_ -> ("", "", 0, 0, "", "", "", "", "", "", false, false, false)
       in
       div
         ~a:[a_id problem_modal_id]
@@ -1009,6 +1017,32 @@ let make_problem_modal () =
                                           ; a_label_for
                                               problem_draft_input_id ]
                                         [txt "Draft"] ] ]
+                            ; (* Disable submissions *)
+                              div
+                                ~a:[a_class ["col-12"]]
+                                [ div
+                                    ~a:[a_class ["form-check"; "form-switch"]]
+                                    [ input
+                                        ~a:
+                                          ( [ a_id
+                                                problem_submission_disabled_input_id
+                                            ; a_input_type `Checkbox
+                                            ; a_class ["form-check-input"] ]
+                                          @
+                                          if is_submission_disabled then
+                                            [a_checked ()]
+                                          else [] )
+                                        ()
+                                    ; label
+                                        ~a:
+                                          [ a_class ["form-check-label"]
+                                          ; a_label_for
+                                              problem_submission_disabled_input_id
+                                          ]
+                                        [ txt
+                                            (I18n.t
+                                               "problems_disable_submissions_label" )
+                                        ] ] ]
                             ; (* Force closed *)
                               div
                                 ~a:[a_class ["col-12"]]
@@ -1874,6 +1908,7 @@ let render_problems_tab () =
                       ; close_at= None
                       ; is_force_closed= Some false
                       ; is_draft= Some false
+                      ; is_submission_disabled= Some false
                       ; languages= []
                       ; source_artifacts= None
                       ; object_artifacts= None } ;
