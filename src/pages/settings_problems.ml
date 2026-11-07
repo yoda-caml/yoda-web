@@ -997,73 +997,107 @@ let make_problem_modal () =
                                       ; a_placeholder "python, java, cpp"
                                       ; a_value languages ]
                                     () ]
-                            ; (* Draft *)
+                            ; (* Problem options *)
                               div
                                 ~a:[a_class ["col-12"]]
                                 [ div
-                                    ~a:[a_class ["form-check"; "form-switch"]]
-                                    [ input
-                                        ~a:
-                                          ( [ a_id problem_draft_input_id
-                                            ; a_input_type `Checkbox
-                                            ; a_class ["form-check-input"] ]
-                                          @
-                                          if is_draft then [a_checked ()]
-                                          else [] )
-                                        ()
-                                    ; label
-                                        ~a:
-                                          [ a_class ["form-check-label"]
-                                          ; a_label_for
-                                              problem_draft_input_id ]
-                                        [txt "Draft"] ] ]
-                            ; (* Disable submissions *)
-                              div
-                                ~a:[a_class ["col-12"]]
-                                [ div
-                                    ~a:[a_class ["form-check"; "form-switch"]]
-                                    [ input
-                                        ~a:
-                                          ( [ a_id
-                                                problem_submission_disabled_input_id
-                                            ; a_input_type `Checkbox
-                                            ; a_class ["form-check-input"] ]
-                                          @
-                                          if is_submission_disabled then
-                                            [a_checked ()]
-                                          else [] )
-                                        ()
-                                    ; label
-                                        ~a:
-                                          [ a_class ["form-check-label"]
-                                          ; a_label_for
-                                              problem_submission_disabled_input_id
-                                          ]
-                                        [ txt
-                                            (I18n.t
-                                               "problems_disable_submissions_label" )
-                                        ] ] ]
-                            ; (* Force closed *)
-                              div
-                                ~a:[a_class ["col-12"]]
-                                [ (let force_closed_attrs =
-                                     [ a_id problem_force_closed_input_id
-                                     ; a_input_type `Checkbox
-                                     ; a_class ["form-check-input"] ]
-                                     @
-                                     if is_force_closed then [a_checked ()]
-                                     else []
-                                   in
-                                   div
-                                     ~a:
-                                       [a_class ["form-check"; "form-switch"]]
-                                     [ input ~a:force_closed_attrs ()
-                                     ; label
-                                         ~a:[a_class ["form-check-label"]]
-                                         [ txt
-                                             (I18n.t
-                                                "problems_force_closed_label" )
-                                         ] ] ) ]
+                                    ~a:[a_class ["border"; "rounded"; "p-3"]]
+                                    [ div
+                                        ~a:[a_class ["row"; "g-3"]]
+                                        [ div
+                                            ~a:[a_class ["col-md-4"]]
+                                            [ div
+                                                ~a:
+                                                  [ a_class
+                                                      [ "form-check"
+                                                      ; "form-switch" ] ]
+                                                [ input
+                                                    ~a:
+                                                      ( [ a_id
+                                                            problem_draft_input_id
+                                                        ; a_input_type
+                                                            `Checkbox
+                                                        ; a_class
+                                                            [ "form-check-input"
+                                                            ] ]
+                                                      @
+                                                      if is_draft then
+                                                        [a_checked ()]
+                                                      else [] )
+                                                    ()
+                                                ; label
+                                                    ~a:
+                                                      [ a_class
+                                                          ["form-check-label"]
+                                                      ; a_label_for
+                                                          problem_draft_input_id
+                                                      ]
+                                                    [txt "Draft"] ] ]
+                                        ; div
+                                            ~a:[a_class ["col-md-4"]]
+                                            [ div
+                                                ~a:
+                                                  [ a_class
+                                                      [ "form-check"
+                                                      ; "form-switch" ] ]
+                                                [ input
+                                                    ~a:
+                                                      ( [ a_id
+                                                            problem_submission_disabled_input_id
+                                                        ; a_input_type
+                                                            `Checkbox
+                                                        ; a_class
+                                                            [ "form-check-input"
+                                                            ] ]
+                                                      @
+                                                      if
+                                                        is_submission_disabled
+                                                      then [a_checked ()]
+                                                      else [] )
+                                                    ()
+                                                ; label
+                                                    ~a:
+                                                      [ a_class
+                                                          ["form-check-label"]
+                                                      ; a_label_for
+                                                          problem_submission_disabled_input_id
+                                                      ]
+                                                    [ txt
+                                                        (I18n.t
+                                                           "problems_disable_submissions_label" )
+                                                    ] ] ]
+                                        ; div
+                                            ~a:[a_class ["col-md-4"]]
+                                            [ (let force_closed_attrs =
+                                                 [ a_id
+                                                     problem_force_closed_input_id
+                                                 ; a_input_type `Checkbox
+                                                 ; a_class
+                                                     ["form-check-input"] ]
+                                                 @
+                                                 if is_force_closed then
+                                                   [a_checked ()]
+                                                 else []
+                                               in
+                                               div
+                                                 ~a:
+                                                   [ a_class
+                                                       [ "form-check"
+                                                       ; "form-switch" ] ]
+                                                 [ input
+                                                     ~a:force_closed_attrs ()
+                                                 ; label
+                                                     ~a:
+                                                       [ a_class
+                                                           [ "form-check-label"
+                                                           ]
+                                                       ; a_label_for
+                                                           problem_force_closed_input_id
+                                                       ]
+                                                     [ txt
+                                                         (I18n.t
+                                                            "problems_force_closed_label" )
+                                                     ] ] ) ] ] ] ]
                             ; (* Description *)
                               div
                                 ~a:[a_class ["col-12"]]
