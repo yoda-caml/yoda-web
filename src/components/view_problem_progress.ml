@@ -9,6 +9,9 @@ let content ?(show_progress_only = false)
   let problem_status = span ~a:[a_class ["badge"; "bg-success"]] [txt ""] in
   let problem_timeleft = span ~a:[a_class ["font-monospace"]] [txt ""] in
   let problem_details = div ~a:[a_class ["problem-details"]] [] in
+  let submissions_disabled_notice =
+    div ~a:[a_class ["alert"; "alert-warning"; "mb-3"; "p-1"; "d-none"]] []
+  in
   let problem_progressbar =
     div ~a:[a_class ["progress-bar"; "bg-info"]; a_style "width: 0%;"] []
   in
@@ -27,6 +30,16 @@ let content ?(show_progress_only = false)
             (Tyxml_js.To_dom.of_h2 problem_title)
             (Dom_html.document##createTextNode
                (Js.string (problem.code ^ ". " ^ problem.title)) ) ;
+          if problem.is_submission_disabled = Some true then (
+            let notice_dom =
+              Tyxml_js.To_dom.of_div submissions_disabled_notice
+            in
+            notice_dom##.classList##remove (Js.string "d-none") ;
+            Dom.appendChild notice_dom
+              (Dom_html.document##createTextNode
+                 (Js.string
+                    ("⚠️ " ^ I18n.t "problem_submissions_disabled_notice") ) )
+            ) ;
           let detail label value =
             dl [dt [txt (I18n.t label)]; dd [txt value]]
           in
@@ -131,6 +144,7 @@ let content ?(show_progress_only = false)
                   ~a:[a_class ["fw-semibold"]]
                   [txt (I18n.t "progress_time_left_label")]
               ; problem_timeleft ] ]
+      ; submissions_disabled_notice
       ; problem_details ]
     else
       [ div

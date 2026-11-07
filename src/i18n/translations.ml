@@ -41,6 +41,7 @@ type translations =
   ; submission_sending: string
   ; submission_problem_check_failed: string
   ; submission_problem_force_closed: string
+  ; problem_submissions_disabled_notice: string
   ; submission_no_problem: string
   ; submission_no_language: string
   ; submission_empty_editor: string
@@ -324,6 +325,8 @@ let en =
       "Cannot submit: failed to check problem status (HTTP %s)"
   ; submission_problem_force_closed=
       "Cannot submit: this problem is force closed"
+  ; problem_submissions_disabled_notice=
+      "Submissions are disabled for this problem."
   ; submission_no_problem= "No selected problem found"
   ; submission_no_language=
       "No language selected or allowed for this problem"
@@ -621,6 +624,8 @@ let de =
        (HTTP %s)"
   ; submission_problem_force_closed=
       "Abgabe nicht möglich: Dieses Problem wurde zwangsweise geschlossen."
+  ; problem_submissions_disabled_notice=
+      "Einreichungen sind für dieses Problem deaktiviert."
   ; submission_no_problem= "Kein Problem ausgewählt"
   ; submission_no_language=
       "Für dieses Problem wurde keine Sprache ausgewählt oder zugelassen"
@@ -926,6 +931,8 @@ let fr =
        %s)"
   ; submission_problem_force_closed=
       "Envoi impossible : ce problème a été fermé manuellement"
+  ; problem_submissions_disabled_notice=
+      "Les soumissions sont désactivées pour ce problème."
   ; submission_no_problem= "Aucun problème sélectionné"
   ; submission_no_language=
       "Aucun langage sélectionné ou autorisé pour ce problème"
@@ -1234,6 +1241,8 @@ let es =
        (HTTP %s)"
   ; submission_problem_force_closed=
       "No se puede enviar: este problema se ha cerrado manualmente"
+  ; problem_submissions_disabled_notice=
+      "Los envíos están desactivados para este problema."
   ; submission_no_problem= "No se ha seleccionado ningún problema"
   ; submission_no_language=
       "No se ha seleccionado un lenguaje permitido para este problema"
@@ -1536,6 +1545,8 @@ let pt =
        problema (HTTP %s)"
   ; submission_problem_force_closed=
       "Não é possível submeter: este problema foi fechado manualmente"
+  ; problem_submissions_disabled_notice=
+      "As submissões estão desativadas para este problema."
   ; submission_no_problem= "Nenhum problema selecionado"
   ; submission_no_language=
       "Nenhuma linguagem selecionada ou permitida para este problema"
@@ -1831,6 +1842,8 @@ let ar =
       "تعذّر الإرسال: فشل التحقق من حالة المسألة (HTTP %s)"
   ; submission_problem_force_closed=
       "تعذّر الإرسال: تم إغلاق هذه المسألة يدويًا"
+  ; problem_submissions_disabled_notice=
+      "تم تعطيل الإرسال لهذه المسألة."
   ; submission_no_problem= "لم يتم اختيار مسألة"
   ; submission_no_language= "لم يتم اختيار لغة مسموح بها لهذه المسألة"
   ; submission_empty_editor= "المحرر فارغ، لا يوجد ما يمكن إرساله"
@@ -2118,6 +2131,8 @@ let map : translations -> (string, string) Hashtbl.t =
   add "submission_sending" tr.submission_sending ;
   add "submission_problem_check_failed" tr.submission_problem_check_failed ;
   add "submission_problem_force_closed" tr.submission_problem_force_closed ;
+  add "problem_submissions_disabled_notice"
+    tr.problem_submissions_disabled_notice ;
   add "submission_no_problem" tr.submission_no_problem ;
   add "submission_no_language" tr.submission_no_language ;
   add "submission_empty_editor" tr.submission_empty_editor ;
