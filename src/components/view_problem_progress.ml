@@ -106,28 +106,55 @@ let content ?(show_progress_only = false)
                        ((now_ms -. start) /. (finish -. start) *. 100.) )
               | _ -> 0.
           in
-          let time_target =
-            if closed then Some now_ms
-            else if upcoming then open_ms
-            else close_ms
-          in
-          let time_left_str =
-            match time_target with
-            | None -> "--:--:--"
-            | Some target ->
-                let remaining_seconds =
-                  int_of_float (max 0. (target -. now_ms) /. 1000.)
-                in
-                Printf.sprintf "%02d:%02d:%02d"
-                  (remaining_seconds / 3600)
-                  (remaining_seconds mod 3600 / 60)
-                  (remaining_seconds mod 60)
-          in
           let progressbar_dom = Tyxml_js.To_dom.of_div problem_progressbar in
           progressbar_dom##.style##.width
           := Js.string (Printf.sprintf "%.2f%%" progress_pct) ;
           let timeleft_dom = Tyxml_js.To_dom.of_span problem_timeleft in
-          timeleft_dom##.textContent := Js.some (Js.string time_left_str) ;
+          let update_time_left () =
+            let date = new%js Js.date_now in
+            let now_ms = Js.float_of_number date##getTime in
+            let upcoming =
+              (not force_closed)
+              && Option.fold ~none:false
+                   ~some:(fun start -> now_ms < start)
+                   open_ms
+            in
+            let closed =
+              force_closed
+              || Option.fold ~none:false
+                   ~some:(fun finish -> now_ms >= finish)
+                   close_ms
+            in
+            let time_target =
+              if closed then Some now_ms
+              else if upcoming then open_ms
+              else close_ms
+            in
+            let time_left_str =
+              match time_target with
+              | None -> "--:--:--"
+              | Some target ->
+                  let remaining_seconds =
+                    int_of_float (max 0. (target -. now_ms) /. 1000.)
+                  in
+                  Printf.sprintf "%02d:%02d:%02d"
+                    (remaining_seconds / 3600)
+                    (remaining_seconds mod 3600 / 60)
+                    (remaining_seconds mod 60)
+            in
+            timeleft_dom##.textContent := Js.some (Js.string time_left_str)
+          in
+          update_time_left () ;
+          ( if not show_progress_only then
+              let rec update_time_left_each_second () =
+                Js_of_ocaml_lwt.Lwt_js.sleep 1.0
+                >>= fun () ->
+                if Js.to_bool timeleft_dom##.isConnected then (
+                  update_time_left () ;
+                  update_time_left_each_second () )
+                else Lwt.return_unit
+              in
+              Lwt.async update_time_left_each_second ) ;
           Lwt.return_unit ) ;
   let problem_overview =
     if not show_progress_only then
