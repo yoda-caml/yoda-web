@@ -33,11 +33,13 @@ let update_status_bar ?(no_time = false) msg =
          (msg ^ if no_time then "" else " • " ^ last_saved) )
 
 let hide s =
+  (* do not hide if it is already hidden *)
   let el = Tyxml_js.To_dom.of_div s in
-  el##.style##.display := Js_of_ocaml.Js.string "none" ;
-  Js_of_ocaml.Console.console##log
-    (Js_of_ocaml.Js.string
-       ("Element hidden: " ^ Js_of_ocaml.Js.to_string el##.id) )
+  if Js_of_ocaml.Js.to_string el##.style##.display <> "none" then (
+    el##.style##.display := Js_of_ocaml.Js.string "none" ;
+    Js_of_ocaml.Console.console##log
+      (Js_of_ocaml.Js.string
+         ("Element hidden: " ^ Js_of_ocaml.Js.to_string el##.id) ) )
 
 let show s =
   let el = Tyxml_js.To_dom.of_div s in
@@ -96,7 +98,7 @@ let toolbar ~mobile () =
                            [ txt
                                (I18n.interpolate
                                   (I18n.t "codebar_confirm_run")
-                                  [ current_problem_description () ] ) ]
+                                  [current_problem_description ()] ) ]
                            (fun _ -> hide spinner ; false)
                            () ) ;
                       false )
@@ -113,7 +115,7 @@ let toolbar ~mobile () =
                      [ txt
                          (I18n.interpolate
                             (I18n.t "codebar_confirm_save")
-                            [ current_problem_description () ] ) ]
+                            [current_problem_description ()] ) ]
                      (fun _ ->
                        hide spinner ;
                        Spinner_modal_update.start () ;
