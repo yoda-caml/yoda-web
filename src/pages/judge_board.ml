@@ -247,6 +247,8 @@ let visible_submissions () =
 
 let select_user user_id =
   incr generation ;
+  Judge_board_export.exporting := false ;
+  Judge_board_export.export_notice := "" ;
   selected_user := user_id ;
   files := [] ;
   analyzing := false ;
@@ -301,6 +303,8 @@ let user_selector ~on_select () =
 
 let load ~on_loaded contest_id =
   incr generation ;
+  Judge_board_export.exporting := false ;
+  Judge_board_export.export_notice := "" ;
   incr batch_request_id ;
   batch_preview := None ;
   batch_fetching := false ;
@@ -1011,6 +1015,8 @@ let metric_selector ~on_select () =
                                  else List.mem m.key selected_keys )
                                metrics ;
                            incr generation ;
+                           Judge_board_export.exporting := false ;
+                           Judge_board_export.export_notice := "" ;
                            analyzing := false ;
                            files := [] ;
                            message := "" ;
@@ -1273,7 +1279,7 @@ let results_table () =
                                  result )
                         ; td
                             [ div
-                                ~a:[a_class ["d-flex"; "gap-2"]]
+                                ~a:[a_class ["d-flex"; "flex-wrap"; "gap-2"]]
                                 ( Components.Llm_evaluation.action_button
                                     ~input ~config:llm_config ~on_result
                                 :: Components.Submissions_list_details
@@ -1360,6 +1366,47 @@ let content contest_id =
                       if !loading || !analyzing then [a_disabled ()] else []
                       )
                     [txt "Refresh"]
+                ; button
+                    ~a:
+                      ( [ a_button_type `Button
+                        ; a_id Judge_board_export.button_id
+                        ; a_class ["btn"; "btn-outline-primary"]
+                        ; a_aria "live" ["polite"]
+                        ; a_onclick (fun _ ->
+                              let request_generation = !generation in
+                              let export_metrics =
+                                List.map
+                                  (fun metric ->
+                                    let name =
+                                      match metric.key with
+                                      | "hamming" -> "D1 Hamming"
+                                      | "levenshtein" -> "D2 Levenshtein"
+                                      | "tokens" -> "D3 Token Jaccard"
+                                      | _ -> metric.label
+                                    in
+                                    (name, metric.calculate) )
+                                  metrics
+                              in
+                              Judge_board_export.export_statistics
+                                ~contest_id
+                                ~is_current:(fun () ->
+                                  !contest = contest_id
+                                  && !generation = request_generation )
+                                ~username:(fun id ->
+                                  Option.value
+                                    ~default:(Printf.sprintf "User #%d" id)
+                                    (Hashtbl.find_opt usernames id) )
+                                ~problem_code ~metrics:export_metrics
+                                (visible_submissions ()) ;
+                              false ) ]
+                      @
+                      if
+                        !loading
+                        || !Judge_board_export.exporting
+                        || !submissions = []
+                      then [a_disabled ()]
+                      else [] )
+                    [txt (Judge_board_export.button_label ())]
                 ; button
                     ~a:
                       ( [ a_class ["btn"; "btn-primary"]
