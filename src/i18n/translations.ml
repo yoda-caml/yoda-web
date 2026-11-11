@@ -41,6 +41,8 @@ type translations =
   ; submission_sending: string
   ; submission_problem_check_failed: string
   ; submission_problem_force_closed: string
+  ; submission_problem_closed: string
+  ; submission_problem_submissions_disabled: string
   ; problem_submissions_disabled_notice: string
   ; submission_no_problem: string
   ; submission_no_language: string
@@ -325,6 +327,9 @@ let en =
       "Cannot submit: failed to check problem status (HTTP %s)"
   ; submission_problem_force_closed=
       "Cannot submit: this problem is force closed"
+  ; submission_problem_closed= "Cannot submit: this problem is closed"
+  ; submission_problem_submissions_disabled=
+      "Cannot submit: submissions are disabled for this problem"
   ; problem_submissions_disabled_notice=
       "Submissions are disabled for this problem."
   ; submission_no_problem= "No selected problem found"
@@ -624,6 +629,11 @@ let de =
        (HTTP %s)"
   ; submission_problem_force_closed=
       "Abgabe nicht möglich: Dieses Problem wurde zwangsweise geschlossen."
+  ; submission_problem_closed=
+      "Abgabe nicht möglich: Dieses Problem ist geschlossen."
+  ; submission_problem_submissions_disabled=
+      "Abgabe nicht möglich: Einreichungen sind für dieses Problem \
+       deaktiviert."
   ; problem_submissions_disabled_notice=
       "Einreichungen sind für dieses Problem deaktiviert."
   ; submission_no_problem= "Kein Problem ausgewählt"
@@ -931,6 +941,9 @@ let fr =
        %s)"
   ; submission_problem_force_closed=
       "Envoi impossible : ce problème a été fermé manuellement"
+  ; submission_problem_closed= "Envoi impossible : ce problème est fermé"
+  ; submission_problem_submissions_disabled=
+      "Envoi impossible : les soumissions sont désactivées pour ce problème"
   ; problem_submissions_disabled_notice=
       "Les soumissions sont désactivées pour ce problème."
   ; submission_no_problem= "Aucun problème sélectionné"
@@ -1241,6 +1254,10 @@ let es =
        (HTTP %s)"
   ; submission_problem_force_closed=
       "No se puede enviar: este problema se ha cerrado manualmente"
+  ; submission_problem_closed=
+      "No se puede enviar: este problema está cerrado"
+  ; submission_problem_submissions_disabled=
+      "No se puede enviar: los envíos están desactivados para este problema"
   ; problem_submissions_disabled_notice=
       "Los envíos están desactivados para este problema."
   ; submission_no_problem= "No se ha seleccionado ningún problema"
@@ -1545,6 +1562,11 @@ let pt =
        problema (HTTP %s)"
   ; submission_problem_force_closed=
       "Não é possível submeter: este problema foi fechado manualmente"
+  ; submission_problem_closed=
+      "Não é possível submeter: este problema está fechado"
+  ; submission_problem_submissions_disabled=
+      "Não é possível submeter: as submissões estão desativadas para este \
+       problema"
   ; problem_submissions_disabled_notice=
       "As submissões estão desativadas para este problema."
   ; submission_no_problem= "Nenhum problema selecionado"
@@ -1842,8 +1864,10 @@ let ar =
       "تعذّر الإرسال: فشل التحقق من حالة المسألة (HTTP %s)"
   ; submission_problem_force_closed=
       "تعذّر الإرسال: تم إغلاق هذه المسألة يدويًا"
-  ; problem_submissions_disabled_notice=
-      "تم تعطيل الإرسال لهذه المسألة."
+  ; submission_problem_closed= "تعذّر الإرسال: هذه المسألة مغلقة"
+  ; submission_problem_submissions_disabled=
+      "تعذّر الإرسال: تم تعطيل الإرسال لهذه المسألة"
+  ; problem_submissions_disabled_notice= "تم تعطيل الإرسال لهذه المسألة."
   ; submission_no_problem= "لم يتم اختيار مسألة"
   ; submission_no_language= "لم يتم اختيار لغة مسموح بها لهذه المسألة"
   ; submission_empty_editor= "المحرر فارغ، لا يوجد ما يمكن إرساله"
@@ -2131,6 +2155,9 @@ let map : translations -> (string, string) Hashtbl.t =
   add "submission_sending" tr.submission_sending ;
   add "submission_problem_check_failed" tr.submission_problem_check_failed ;
   add "submission_problem_force_closed" tr.submission_problem_force_closed ;
+  add "submission_problem_closed" tr.submission_problem_closed ;
+  add "submission_problem_submissions_disabled"
+    tr.submission_problem_submissions_disabled ;
   add "problem_submissions_disabled_notice"
     tr.problem_submissions_disabled_notice ;
   add "submission_no_problem" tr.submission_no_problem ;
