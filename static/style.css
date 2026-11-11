@@ -3,6 +3,28 @@ body {
   height: 100%;
 }
 
+/* Problem description and test case styles */
+
+.problem-description-content {
+    max-height: 600px;
+    overflow: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    margin-bottom: 0;
+}
+
+.problem-test-case-content {
+    max-height: 220px;
+    overflow: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    margin-bottom: 0;
+}
+
+/* Problem details styles */
+
 .problem-details {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
@@ -208,6 +230,7 @@ body {
 }
 
 /* login and form styles */
+
 .form-signin {
   max-width: 330px;
   padding: 1rem;

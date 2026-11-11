@@ -1387,8 +1387,8 @@ let problem_card (problem : Api.Openapi.problem) =
                           ; "p-3"
                           ; "rounded"
                           ; "font-monospace"
-                          ; "border" ]
-                      ; a_style "white-space: pre-wrap;" ]
+                          ; "border"
+                          ; "problem-description-content" ] ]
                     [code [txt problem.description]] ]
             ; (* Test cases *)
               div
@@ -1562,7 +1562,9 @@ let problem_card (problem : Api.Openapi.problem) =
                                          [ "bg-light"
                                          ; "p-2"
                                          ; "rounded"
-                                         ; "font-monospace" ] ]
+                                         ; "font-monospace"
+                                         ; "w-100"
+                                         ; "problem-test-case-content" ] ]
                                    [txt tc.input]
                                ; ( match tc.oracle with
                                  | None -> div []
@@ -1590,7 +1592,9 @@ let problem_card (problem : Api.Openapi.problem) =
                                          [ "bg-light"
                                          ; "p-2"
                                          ; "rounded"
-                                         ; "font-monospace" ] ]
+                                         ; "font-monospace"
+                                         ; "w-100"
+                                         ; "problem-test-case-content" ] ]
                                    [txt tc.output] ] )
                            tcases
                        in
@@ -1602,7 +1606,7 @@ let problem_card (problem : Api.Openapi.problem) =
                                   div
                                     ~a:
                                       [ a_class
-                                          [ ( if i mod 2 = 0 then "col-md-6"
+                                          [ ( if i mod 2 = 0 then "col-md-10"
                                               else "" ) ] ]
                                     [row] )
                                 test_case_rows ) ]
