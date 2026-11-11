@@ -2,8 +2,6 @@ open Js_of_ocaml
 open Js_of_ocaml_lwt
 open Lwt.Infix
 
-type metric = string * (string -> string -> (int * float) option)
-
 let exporting = ref false
 
 let export_notice = ref ""
@@ -75,86 +73,69 @@ let csv_cell value =
   in
   "\"" ^ String.concat "\"\"" (String.split_on_char '"' value) ^ "\""
 
-let csv ~username ~problem_code ~(metrics : metric list) submissions =
-  let latest = Hashtbl.create 32 in
-  let counts = Hashtbl.create 32 in
+let test_results details =
+  List.map
+    (fun (detail : Api.Openapi.submissionDetail) ->
+      Printf.sprintf "Test #%d: %s (%d ms)" detail.testcase_id detail.status
+        detail.time_ms )
+    details
+  |> String.concat "\n"
+
+let latest_submissions submissions =
+  let groups = Hashtbl.create 32 in
+  let unknown = ref [] in
   List.iter
-    (fun ((sub : Api.Openapi.submission), _) ->
+    (fun (sub : Api.Openapi.submission) ->
       match sub.owner_id with
-      | None -> ()
-      | Some owner -> (
+      | None -> unknown := (sub, 1) :: !unknown
+      | Some owner ->
           let key = (owner, sub.problem_id) in
-          Hashtbl.replace counts key
-            (1 + Option.value ~default:0 (Hashtbl.find_opt counts key)) ;
-          match Hashtbl.find_opt latest key with
-          | Some id when id >= sub.id -> ()
-          | _ -> Hashtbl.replace latest key sub.id ) )
+          let latest, count =
+            match Hashtbl.find_opt groups key with
+            | None -> (sub, 1)
+            | Some ((latest : Api.Openapi.submission), count) ->
+                ((if latest.id >= sub.id then latest else sub), count + 1)
+          in
+          Hashtbl.replace groups key (latest, count) )
     submissions ;
-  let previous = Hashtbl.create 32 in
-  let rows = ref [] in
-  let add_row sub filename distances attempts =
-    let user =
-      match sub.Api.Openapi.owner_id with
-      | None -> "Username unavailable (owner unknown)"
-      | Some id -> username id
-    in
-    let values =
-      [user; string_of_int sub.id; filename; problem_code sub.problem_id]
-      @ distances
-      @ [sub.status; string_of_int attempts]
-    in
-    rows := String.concat "," (List.map csv_cell values) :: !rows
-  in
-  submissions
+  Hashtbl.fold (fun _ group acc -> group :: acc) groups !unknown
   |> List.sort (fun ((a : Api.Openapi.submission), _) (b, _) ->
       Int.compare a.id b.id )
-  |> List.iter (fun ((sub : Api.Openapi.submission), sources) ->
-      let is_latest, attempts =
-        match sub.owner_id with
-        | None -> (true, 1)
-        | Some owner ->
-            let key = (owner, sub.problem_id) in
-            (Hashtbl.find latest key = sub.id, Hashtbl.find counts key)
-      in
-      if is_latest && sources = [] then
-        add_row sub "" (List.map (fun _ -> "") metrics) attempts ;
-      List.iter
-        (fun (source : Api.Openapi.sourceArtifact) ->
-          let key = (sub.owner_id, sub.problem_id, source.filename) in
-          let prior =
-            match sub.owner_id with
-            | None -> None
-            | Some _ -> Hashtbl.find_opt previous key
-          in
-          ( if is_latest then
-              let distances =
-                List.map
-                  (fun (_, calculate) ->
-                    match
-                      Option.bind prior (fun content ->
-                          calculate content source.content )
-                    with
-                    | Some (distance, _) -> string_of_int distance
-                    | None -> "" )
-                  metrics
-              in
-              add_row sub source.filename distances attempts ) ;
-          if sub.owner_id <> None then
-            Hashtbl.replace previous key source.content )
-        sources ) ;
+
+let csv ~username ~problem_code submissions =
+  let rows =
+    List.map
+      (fun ((sub : Api.Openapi.submission), attempts) ->
+        let user =
+          match sub.owner_id with
+          | None -> "Username unavailable (owner unknown)"
+          | Some id -> username id
+        in
+        [ user
+        ; string_of_int sub.id
+        ; problem_code sub.problem_id
+        ; sub.status
+        ; string_of_int attempts
+        ; test_results sub.details ]
+        |> List.map csv_cell |> String.concat "," )
+      submissions
+  in
   let header =
-    ["User"; "Submission"; "Filename"; "Problem"]
-    @ List.map fst metrics
-    @ ["Last judge verdict"; "Attempts"]
+    [ "User"
+    ; "Submission"
+    ; "Problem"
+    ; "Last judge verdict"
+    ; "Attempts"
+    ; "Test results" ]
     |> List.map csv_cell |> String.concat ","
   in
-  String.concat "\r\n" (header :: List.rev !rows) ^ "\r\n"
+  String.concat "\r\n" (header :: rows) ^ "\r\n"
 
-let prepare ~is_current ~on_progress ~username ~problem_code ~metrics
-    submissions =
+let prepare ~is_current ~on_progress ~username ~problem_code submissions =
+  let submissions = latest_submissions submissions in
   let total = List.length submissions in
   let completed = ref 0 in
-  let rec fetch_details (sub : Api.Openapi.submission) retries =
+  let rec fetch_details (sub : Api.Openapi.submission) attempts retries =
     wait_for_request ~is_current
     >>= fun () ->
     XmlHttpRequest.perform_raw_url ~headers:(Api.Helpers.headers ())
@@ -166,7 +147,7 @@ let prepare ~is_current ~on_progress ~username ~problem_code ~metrics
       let delay = retry_delay (response.headers "Retry-After") in
       next_request_at := max !next_request_at (now () +. delay) ;
       on_progress !completed total true ;
-      fetch_details sub (retries - 1) )
+      fetch_details sub attempts (retries - 1) )
     else if response.code <> 200 then
       Lwt.fail_with
         (Printf.sprintf "Submission #%d details request failed (%d)." sub.id
@@ -179,13 +160,15 @@ let prepare ~is_current ~on_progress ~username ~problem_code ~metrics
       incr completed ;
       on_progress !completed total false ;
       Lwt.return
-        ( {sub with status= details.submission.status}
-        , details.source_artifacts )
+        ( { sub with
+            status= details.submission.status
+          ; details= details.submission.details }
+        , attempts )
   in
   Lwt_list.map_s
-    (fun (sub : Api.Openapi.submission) -> fetch_details sub 3)
+    (fun (sub, attempts) -> fetch_details sub attempts 3)
     submissions
-  >|= fun fetched -> csv ~username ~problem_code ~metrics fetched
+  >|= fun fetched -> csv ~username ~problem_code fetched
 
 let trigger_download ~contest_id content =
   let blob =
@@ -209,7 +192,7 @@ let trigger_download ~contest_id content =
        [|Js.Unsafe.inject (Js.string object_url)|] )
 
 let export_statistics ~contest_id ~is_current ~username ~problem_code
-    ~metrics submissions =
+    submissions =
   if not !exporting then (
     exporting := true ;
     export_notice := "Preparing CSV export..." ;
@@ -225,7 +208,7 @@ let export_statistics ~contest_id ~is_current ~username ~problem_code
                     ( if rate_limited then " Rate limited; waiting to retry."
                       else "" ) ;
                 update_button () )
-              ~username ~problem_code ~metrics submissions
+              ~username ~problem_code submissions
             >|= fun csv ->
             if is_current () then (
               trigger_download ~contest_id csv ;

@@ -1374,19 +1374,6 @@ let content contest_id =
                         ; a_aria "live" ["polite"]
                         ; a_onclick (fun _ ->
                               let request_generation = !generation in
-                              let export_metrics =
-                                List.map
-                                  (fun metric ->
-                                    let name =
-                                      match metric.key with
-                                      | "hamming" -> "D1 Hamming"
-                                      | "levenshtein" -> "D2 Levenshtein"
-                                      | "tokens" -> "D3 Token Jaccard"
-                                      | _ -> metric.label
-                                    in
-                                    (name, metric.calculate) )
-                                  metrics
-                              in
                               Judge_board_export.export_statistics
                                 ~contest_id
                                 ~is_current:(fun () ->
@@ -1396,7 +1383,7 @@ let content contest_id =
                                   Option.value
                                     ~default:(Printf.sprintf "User #%d" id)
                                     (Hashtbl.find_opt usernames id) )
-                                ~problem_code ~metrics:export_metrics
+                                ~problem_code
                                 (visible_submissions ()) ;
                               false ) ]
                       @

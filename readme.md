@@ -14,6 +14,8 @@ Yoda Web (yoda-w) is the browser frontend for the Yoda Backend server (yoda-b). 
 
 This repository contains the frontend only. A running Yoda API is required for application data; the `yoda-w` checks the API's `/status` endpoint before showing the application.
 
+For using the application, see the [user guide](doc/user-guide.md).
+
 ## Run the Container Image
 
 Docker or Podman and a separately running Yoda API are required. The easiest option is to use the [published Yoda Web container image](https://github.com/anmaped/yoda-web/pkgs/container/yoda-web).
