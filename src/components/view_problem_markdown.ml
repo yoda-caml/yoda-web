@@ -67,6 +67,18 @@ let render_markdown ?(allow_html = true) text =
       let markdownit =
         Js.Unsafe.fun_call markdownit_factory [|Js.Unsafe.inject options|]
       in
+      ( match
+          Js.Optdef.to_option
+            (Js.Unsafe.get Js.Unsafe.global "markdownitMathjax")
+        with
+      | None ->
+          Console.console##log (Js.string "markdown-it-mathjax not found")
+      | Some mathjax_factory ->
+          Console.console##log (Js.string "Using markdown-it-mathjax") ;
+          let mathjax_plugin = Js.Unsafe.fun_call mathjax_factory [||] in
+          ignore
+            (Js.Unsafe.meth_call markdownit "use"
+               [|Js.Unsafe.inject mathjax_plugin|] ) ) ;
       let rendered =
         Js.Unsafe.meth_call markdownit "render"
           [|Js.Unsafe.inject (Js.string cleaned)|]
@@ -103,8 +115,11 @@ let trigger_math_render (root : Dom_html.element Js.t) =
               in
               let on_success =
                 Js.wrap_callback (fun svg ->
-                  (* add class to svg *)
-                  ignore (Js.Unsafe.meth_call svg "setAttribute" [|Js.Unsafe.inject (Js.string "class"); Js.Unsafe.inject (Js.string "graphviz-svg")|]);
+                    (* add class to svg *)
+                    ignore
+                      (Js.Unsafe.meth_call svg "setAttribute"
+                         [| Js.Unsafe.inject (Js.string "class")
+                          ; Js.Unsafe.inject (Js.string "graphviz-svg") |] ) ;
                     ignore
                       (Js.Unsafe.meth_call parent "replaceWith"
                          [|Js.Unsafe.inject svg|] ) )

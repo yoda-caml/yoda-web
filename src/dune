@@ -22,6 +22,7 @@
    ../static/sls.min.js
    ../static/sls-sync-bridge.min.js
    markdown-it.min.js
+   markdown-it-mathjax.js
    viz.js
    full.render.js
    mathjax.min.js))
@@ -141,3 +142,16 @@
  (action
   (progn
    (run curl -L -o %{targets} https://unpkg.com/viz.js@2.1.2/full.render.js))))
+
+;; Rule to download Markdown-it MathJax plugin
+
+(rule
+ (targets markdown-it-mathjax.js)
+ (action
+  (progn
+   (run
+    curl
+    -L
+    -o
+    %{targets}
+    https://cdn.jsdelivr.net/npm/markdown-it-mathjax@2.0.0/markdown-it-mathjax.js))))
