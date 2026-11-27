@@ -25,7 +25,7 @@
    markdown-it-mathjax.js
    viz.js
    full.render.js
-   mathjax.min.js))
+   ../static/mathjax.min.js))
  (preprocess
   (pps js_of_ocaml-ppx)))
 
@@ -113,19 +113,6 @@
     -o
     %{targets}
     https://unpkg.com/markdown-it@14.3.2/dist/markdown-it.min.js))))
-
-;; Rule to download MathJax
-
-(rule
- (targets mathjax.min.js)
- (action
-  (progn
-   (run
-    curl
-    -L
-    -o
-    %{targets}
-    https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js))))
 
 ;; Rule to download Viz.js
 
